@@ -18,7 +18,7 @@ const defaultOptions = {
 const Logo = () => {
     return (
             <Tilt options={defaultOptions} style={{ height: 150, width: 150 }}>
-                <div className='Tilt-inner pa3'><img src={meta} alt='brain'></img></div>
+                <div className='Tilt-inner br4 pa2 shadow-3 ma3'><img src={meta} alt='brain'></img></div>
             </Tilt>
     );
 }
