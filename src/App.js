@@ -4,23 +4,20 @@ import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ILF.js';
 import Rank from './components/Rank/rank';
 import FaceRecognition from './components/FaceRecognition/FR';
-import signIn from './components/signIn/signIn.js';
+import Signin from './components/Signin/Signin.js';
+import Register from './components/register/register';
 import './App.css';
 import ParticlesBg from 'particles-bg';
 import 'tachyons';
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
-    // In this section, we set the user authentication, user and app ID, model details, and the URL
-    // of the image we want as an input. Change these strings to run your own example.
-    //////////////////////////////////////////////////////////////////////////////////////////////////
     const MODEL_ID = 'face-detection';
-    const MODEL_VERSION_ID = 'aa7f35c01e0642fda5cf400f543e7c40';   
-    const returnRequestOption = (imageURL) => {
-
+    //const MODEL_VERSION_ID = '6dc7e46bc9124c5c8824be4822abe105'; 
     const PAT = '5cc151338e6f459cbfd2bb87aa839500';
     const USER_ID = 'vmkhlz790uou';       
-    const APP_ID = 'smart-brain';   
-    const IMAGE_URL = 'https://d2v9ipibika81v.cloudfront.net/uploads/sites/271/Africa-2.png';
+    const APP_ID = 'smart-brain';    
+
+    const returnRequestOption = (imageURL) => {
+    const IMAGE_URL = imageURL;
 
     const raw = JSON.stringify({
         "user_app_id": {
@@ -49,14 +46,51 @@ import 'tachyons';
     return requestOptions;
   }
 
+  const initialState = {
+    input: '',
+    imageURL:'',
+    box: {},
+    route: 'signin',
+    isSignined: false,
+    user: {
+          id: '',
+          name:'',
+          email: '',
+          entries: 0,
+          joined: ''
+    }
+  }
   
-
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      input: '',
+    this.state = initialState;
+  }
+
+  loadUser = (data) => {
+    this.setState({user: {
+      id: data[0].id,
+      name: data[0].name,
+      email: data[0].email,
+      entries: data[0].entries,
+      joined: data[0].joined
+    }})
+  }
+  calculateFaceLocation = (data) => {
+    const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
+    const image = document.getElementById('inputimage');
+    const width = Number(image.width);
+    const height = Number(image.height);
+    return {
+      leftCol: clarifaiFace.left_col * width,
+      topRow: clarifaiFace.top_row * height,
+      rightCol: width - (clarifaiFace.right_col * width),
+      bottomRow: height - (clarifaiFace.bottom_row * height)
     }
+  }
+
+  displayFaceBox = (box) => {
+    this.setState({box: box});
   }
 
   onInputChange = (event) => {
@@ -65,26 +99,61 @@ class App extends Component {
 
   onButtonSubmit = () => {
     this.setState({imageURL: this.state.input});
-    fetch("https://api.clarifai.com/v2/models/" + MODEL_ID + "/versions/" + MODEL_VERSION_ID + "/outputs", returnRequestOption(this.state.input))
-    .then(response => console.log(response.outputs[0].data.regions[0].region_info.bounding_box))
-    .catch(error => console.log('error', error));
+     fetch("https://api.clarifai.com/v2/models/" + MODEL_ID + "/outputs", returnRequestOption(this.state.input))
+        .then(response => response.json())
+      .then(response => {
+        console.log('clarifai API res:', response)
+        if (response) {
+          fetch('http://localhost:3001/image', {
+            method: 'put',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              id: this.state.user.id
+            })
+          })
+            .then(response => response.json())
+            .then(count => {
+              this.setState(Object.assign(this.state.user, { entries: count}))
+            })
+
+        }
+        this.displayFaceBox(this.calculateFaceLocation(response))
+      })
+      .catch(err => console.log(err));
+  }
+
+  onRouteChange = (route) => {
+    this.setState({route: route});
   }
 
   render() {
     return (
       <div className='App'>
         <ParticlesBg num={200} type="circle" bg={true}/>
-        <div className='container'>
-          <Logo />
-          <Navigation />
+        { this.state.route === 'home'
+       ? <div>
+            <div className='container'>
+              <Logo />
+              <Navigation onRouteChange= {this.onRouteChange}/>
+            </div>
+            <Rank name ={this.state.user.name} entries={this.state.user.entries}/> 
+            <ImageLinkForm 
+            onInputChange={this.onInputChange} 
+            onButtonSubmit={this.onButtonSubmit}
+            />
+            <FaceRecognition box={this.state.box} imageURL={this.state.imageURL}/> 
         </div>
-        <signIn />
-        <Rank />
-        <ImageLinkForm 
-        onInputChange={this.onInputChange} 
-        onButtonSubmit={this.onButtonSubmit}
-        />
-         <FaceRecognition imageURL={this.state.imageURL}/> 
+        : ( 
+            this.state.route === 'signin'
+            ? <Signin onRouteChange= {this.onRouteChange}
+            loadUser = {this.loadUser}
+            />
+            : <Register onRouteChange= {this.onRouteChange}
+                        loadUser = {this.loadUser}
+                        />   
+          )
+        }
+         
      </div> 
     ) 
     
