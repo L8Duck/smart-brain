@@ -52,6 +52,7 @@ class Register extends React.Component {
           <div className="measure">
             <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
               <legend className="f1 fw6 ph0 mh0">Register</legend>
+              <p className="bg-moon-gray br-pill f5 link dim bold black db shadow-5">{this.state.err}</p>
               <div className="mt3">
                 <label className="db fw6 lh-copy f6" htmlFor="name">Name</label>
                 <input
@@ -90,9 +91,11 @@ class Register extends React.Component {
                 type="submit"
                 value="Register"
               />
-              <p className="f5 link dim bold black db shadow-5">{this.state.err}</p>
             </div>
-          </div>
+            <div className="lh-copy mt3">
+                        <p onClick={() => this.props.onRouteChange('signin')} className="b f6 link dim black db">Sign in</p>
+                        </div>
+            </div>
         </main>
       </article>
     );

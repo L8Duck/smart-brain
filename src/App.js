@@ -11,7 +11,6 @@ import ParticlesBg from 'particles-bg';
 import 'tachyons';
 
     const MODEL_ID = 'face-detection';
-    //const MODEL_VERSION_ID = '6dc7e46bc9124c5c8824be4822abe105'; 
     const PAT = '5cc151338e6f459cbfd2bb87aa839500';
     const USER_ID = 'vmkhlz790uou';       
     const APP_ID = 'smart-brain';    
@@ -102,7 +101,6 @@ class App extends Component {
      fetch("https://api.clarifai.com/v2/models/" + MODEL_ID + "/outputs", returnRequestOption(this.state.input))
         .then(response => response.json())
       .then(response => {
-        console.log('clarifai API res:', response)
         if (response) {
           fetch('http://localhost:3001/image', {
             method: 'put',

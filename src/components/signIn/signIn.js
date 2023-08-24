@@ -47,6 +47,7 @@ class signIn extends React.Component {
                     <div className="measure">
                         <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
                         <legend className="f1 fw6 ph0 mh0">Sign In</legend>
+                        <p className="f6 link dim bold black db shadow-5"> {this.state.err} </p>
                         <div className="mt3">
                             <label className="db fw6 lh-copy f6" for="email-address">Email</label>
                             <input 
@@ -70,7 +71,7 @@ class signIn extends React.Component {
                         </div>
                         <div className="lh-copy mt3">
                         <p onClick={() => this.props.onRouteChange('register')} className="f6 link dim black db">register</p>
-                        <p className="f6 link dim bold black db shadow-5">{this.state.err}</p>
+                       
                         </div>
                     </div>
                 </main>
