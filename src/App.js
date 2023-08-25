@@ -10,41 +10,6 @@ import './App.css';
 import ParticlesBg from 'particles-bg';
 import 'tachyons';
 
-    const MODEL_ID = 'face-detection';
-    const PAT = '5cc151338e6f459cbfd2bb87aa839500';
-    const USER_ID = 'vmkhlz790uou';       
-    const APP_ID = 'smart-brain';    
-
-    const returnRequestOption = (imageURL) => {
-    const IMAGE_URL = imageURL;
-
-    const raw = JSON.stringify({
-        "user_app_id": {
-            "user_id": USER_ID,
-            "app_id": APP_ID
-        },
-        "inputs": [
-            {
-                "data": {
-                    "image": {
-                        "url": IMAGE_URL
-                    }
-                }
-            }
-        ]
-    });
-
-    const requestOptions = {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Authorization': 'Key ' + PAT
-        },
-        body: raw
-    };
-    return requestOptions;
-  }
-
   const initialState = {
     input: '',
     imageURL:'',
@@ -98,8 +63,14 @@ class App extends Component {
 
   onButtonSubmit = () => {
     this.setState({imageURL: this.state.input});
-     fetch("https://api.clarifai.com/v2/models/" + MODEL_ID + "/outputs", returnRequestOption(this.state.input))
-        .then(response => response.json())
+      fetch('http://localhost:3001/api', {
+        method: 'post',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          imageURL: this.state.input
+        })
+      })
+      .then(response => response.json())
       .then(response => {
         if (response) {
           fetch('http://localhost:3001/image', {
